@@ -7,8 +7,8 @@ ifeq ($(DEVICE), xpu)
 	DOCKERFILE ?= Dockerfile.xpu
 else ifeq ($(DEVICE), cpu)
 	DOCKERFILE ?= Dockerfile.cpu
-else ifeq ($(DEVICE), cuda-efa)
-	DOCKERFILE ?= Dockerfile.aws
+else ifeq ($(DEVICE), hpu)
+	DOCKERFILE ?= Dockerfile.hpu
 else
 	DOCKERFILE ?= Dockerfile.cuda
 endif # Maybe we break out version per image because they share no common bits --> independent releas cycles
@@ -17,7 +17,7 @@ VERSION ?= v0.2.1
 # New tag to use if you would like to use `make image-retag`
 NEW_TAG ?= sha256...
 
-# DEVICE, options: ['cuda', 'xpu', 'cpu','cuda-efa']
+# DEVICE, options: ['cuda', 'xpu', 'cpu', 'hpu']
 DEVICE ?= cuda
 
 IMAGE_BASE ?= ghcr.io/llm-d/$(PROJECT_NAME)-$(DEVICE)
@@ -28,21 +28,32 @@ ifeq ($(BUILD_TYPE), dev)
 	IMAGE_BASE := $(IMAGE_BASE)-dev
 endif
 
+# BUILD_DEBUG, options ['true', 'false']
+BUILD_DEBUG ?= false
+ifeq ($(BUILD_DEBUG), true)
+	IMAGE_BASE := $(IMAGE_BASE)-debug
+endif
+
 IMG := $(IMAGE_BASE):$(VERSION)
 
 CONTAINER_TOOL := $(shell (command -v docker >/dev/null 2>&1 && echo docker) || (command -v podman >/dev/null 2>&1 && echo podman) || echo "")
 BUILDER := $(shell command -v buildah >/dev/null 2>&1 && echo buildah || echo $(CONTAINER_TOOL))
 PLATFORMS ?= linux/amd64 # linux/arm64 # linux/s390x,linux/ppc64le
 
+# SUPPRESS_PYTHON_OUTPUT: Set to "1" or "true" to suppress verbose pip output during build (default: verbose enabled)
+SUPPRESS_PYTHON_OUTPUT ?=
+
 .PHONY: help
 help: ## Print help
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
-	@printf "\n\033[1mXPU Build Examples:\033[0m\n"
-	@printf "  \033[36mmake image-build DEVICE=xpu\033[0m                    # Build Intel XPU Docker image\n"
-	@printf "  \033[36mmake image-build DEVICE=xpu VERSION=v0.2.0\033[0m     # Build with specific version\n"
-	@printf "  \033[36mmake image-push DEVICE=xpu\033[0m                     # Push Intel XPU Docker image\n"
-	@printf "  \033[36mmake image-retag DEVICE=xpu NEW_TAG=test\033[0m                     # Re-Tag Intel XPU Docker image\n"
-	@printf "  \033[36mmake env DEVICE=xpu\033[0m                            # Show XPU environment variables\n"
+	@printf "\n\033[1mBuild Examples:\033[0m\n"
+	@printf "  \033[36mmake image-build DEVICE=cuda\033[0m                            # Build CUDA Docker image (default)\n"
+	@printf "  \033[36mmake image-build DEVICE=cuda BUILD_DEBUG=true\033[0m           # Build CUDA Docker image with debug symbols\n"
+	@printf "  \033[36mmake image-build DEVICE=xpu\033[0m                             # Build Intel XPU Docker image\n"
+	@printf "  \033[36mmake image-build DEVICE=xpu VERSION=v0.2.0\033[0m              # Build with specific version\n"
+	@printf "  \033[36mmake image-push DEVICE=xpu\033[0m                              # Push Intel XPU Docker image\n"
+	@printf "  \033[36mmake image-retag DEVICE=xpu NEW_TAG=test\033[0m                # Re-Tag Intel XPU Docker image\n"
+	@printf "  \033[36mmake env DEVICE=xpu\033[0m                                     # Show XPU environment variables\n"
 
 ##@ Development
 
@@ -110,7 +121,10 @@ buildah-build: check-builder ## Build and push image (multi-arch if supported)
 .PHONY:	image-build
 image-build: check-container-tool ## Build Docker image using $(CONTAINER_TOOL)
 	@printf "\033[33;1m==== Building Docker image $(IMG) ====\033[0m\n"
-	$(CONTAINER_TOOL) build --progress=plain --platform $(PLATFORMS) -t $(IMG) -f $(DOCKERFILE_DIR)/$(DOCKERFILE) .
+	$(CONTAINER_TOOL) build --progress=plain --platform $(PLATFORMS) \
+		$(if $(SUPPRESS_PYTHON_OUTPUT),--build-arg SUPPRESS_PYTHON_OUTPUT=$(SUPPRESS_PYTHON_OUTPUT)) \
+		--build-arg BUILD_DEBUG=$(BUILD_DEBUG) \
+		-t $(IMG) -f $(DOCKERFILE_DIR)/$(DOCKERFILE) .
 
 .PHONY: image-push
 image-push: check-container-tool ## Push Docker image $(IMG) to registry
@@ -291,6 +305,12 @@ check-builder:
 	else \
 		echo "✅ Using builder: $(BUILDER)"; \
 	fi
+
+.PHONY: check-buildah
+check-buildah:
+	@command -v buildah >/dev/null 2>&1 || { \
+	  echo "⚠️  buildah is not installed. You can install it with:"; \
+	  echo "🔧 sudo apt install buildah  OR  brew install buildah"; exit 1; }
 
 .PHONY: check-podman
 check-podman:

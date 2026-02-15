@@ -76,7 +76,7 @@ The first key step in testing a feature, or bugfix is to identify what layer of 
   * Check that your `InferencePool` exists (`kubectl get InferencePool.inference.networking.k8s.io`)
 * Upgrading Infra helmchart or anything affecting Gateway infrastructure
   * Check the `gateway` object (`kubectl get gateway -o yaml`)
-    * Check the `status` seciton, make sure it has an `address` and that there is a message saying `"Resource programmed, assigned to service(s) <gateway_service_address>"`
+    * Check the `status` section, make sure it has an `address` and that there is a message saying `"Resource programmed, assigned to service(s) <gateway_service_address>"`
     * Check the `parametersRef` for the `gateway` `infrastructure` exists (`kubectl get gateway wide-ep-inference-gateway -o yaml | yq .spec.infrastructure.parametersRef`, and then check to ensure that resource itself exists)
   * If using `istio` also check that your `DestinationRule` exists
 * Check the `httpRoute` object `status` section (`kubectl get httpRoute -o yaml | yq '.status.parents[]'`)
@@ -93,9 +93,9 @@ The first key step in testing a feature, or bugfix is to identify what layer of 
     * For `pplx` you can set both `prefill` and `decode` `VLLM_ALL2ALL_BACKEND` to `pplx`
       * This can be ran in any example
     * For testing the deepseek kernels, you can set `prefill`s backend to `deepep_high_throughput` and `decode` backend to `deepep_low_latency`
-      * This needs to be tested in either `pd-dissagregation` or better yet `wide-ep-lws`
+      * This needs to be tested in either `pd-disaggregation` or better yet `wide-ep-lws`
 * `UCX` + `NIXL` version bumps and changes
-  * This can be tested in `pd-dissagregation` or `wide-ep-lws`
+  * This can be tested in `pd-disaggregation` or `wide-ep-lws`
   * Currently we build `UCX` from source, and then build `NIXL` against our build of `NIXL`
 * `LMCache` version bumps and changes (coming soon)
   * Currently nothing uses the `LMCache` codepath directly, this will come as a subset of the KVCache offloading epic
@@ -104,7 +104,8 @@ The first key step in testing a feature, or bugfix is to identify what layer of 
   * This can be tested in any example
 * `EFA`
   * To test the libfabric plugin itself over NIXL you can do the following inside a container image built with EFA support (does not require GPUs or EFA):
-```
+
+```bash
 export NIXL_LOG_LEVEL=debug
 python3 - <<'EOF'
 from nixl._api import nixl_agent, nixl_agent_config
@@ -112,7 +113,8 @@ agent_config = nixl_agent_config(backends=["LIBFABRIC"])
 nixl_agent1 = nixl_agent("target", agent_config)
 EOF
 ```
-  * To test actual inference over EFA in AWS with P5+ instances ensure that `UCX_TLS` includes an option with high priority for accelerating over EFA via an ENV var:
+
+* To test actual inference over EFA in AWS with P5+ instances ensure that `UCX_TLS` includes an option with high priority for accelerating over EFA via an ENV var:
 
 ```yaml
   - name: UCX_TLS
@@ -130,11 +132,11 @@ EOF
 
 * [ ] `inference-scheduler` guide
 * [ ] `precise-kv-cache-aware` example
-* [ ] `pd-dissagregation` example (also covers deepseek kernels)
+* [ ] `pd-disaggregation` example (also covers deepseek kernels)
 * [ ] `wide-ep-lws` example (also covers deepseek kernels)
 * [ ] a `guidellm` benchmark to do a load test for performance regressions (any example)
 * [ ] run a guide with the `pplx` backend
-* [ ] run `pd-dissagregation` or `wide-ep-lws` with deepseek kernels (for `prefill`s set `VLLM_ALL2ALL_BACKEND` to `deepep_high_throughput` and set `decode` `VLLM_ALL2ALL_BACKEND` to `deepep_low_latency`)
+* [ ] run `pd-disaggregation` or `wide-ep-lws` with deepseek kernels (for `prefill`s set `VLLM_ALL2ALL_BACKEND` to `deepep_high_throughput` and set `decode` `VLLM_ALL2ALL_BACKEND` to `deepep_low_latency`)
 
 ### Code Review Requirements
 
