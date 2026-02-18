@@ -21,7 +21,6 @@ spec:
             - --port=8000
             - --vllm-port=8200
             - --connector=nixlv2
-            - -v=1
             - --secure-proxy=false
           ports:
             - containerPort: 8000
