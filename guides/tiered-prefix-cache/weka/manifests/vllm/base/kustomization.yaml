@@ -151,12 +151,12 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/startupProbe
         value:
-          exec:
-            command:
-              - "/usr/local/bin/gds-startup-probe.sh"
+          httpGet:
+            path: /health
+            port: 8000
           initialDelaySeconds: 5
           periodSeconds: 5
-          failureThreshold: 12
+          failureThreshold: 120
 
   # Update readiness probe
   - target:

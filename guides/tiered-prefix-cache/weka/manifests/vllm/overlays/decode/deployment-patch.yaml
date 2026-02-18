@@ -81,3 +81,10 @@ spec:
               memory: 64Gi
               nvidia.com/gpu: "4"
               rdma/ib: 1
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8200
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 120
