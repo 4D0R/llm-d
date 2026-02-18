@@ -329,7 +329,6 @@ ENV LANG="C.UTF-8" \
 ENV LD_LIBRARY_PATH="\
 /opt/vllm/lib64/python${PYTHON_VERSION}/site-packages/torch/lib:\
 /usr/local/nvidia/lib:/usr/local/nvidia/lib64:\
-${CUDA_HOME}/lib64/stubs:\
 ${CUDA_HOME}/lib64:\
 ${EFA_PREFIX}/lib:${EFA_PREFIX}/lib64:\
 ${UCX_PREFIX}/lib:${UCX_PREFIX}/lib64:\
