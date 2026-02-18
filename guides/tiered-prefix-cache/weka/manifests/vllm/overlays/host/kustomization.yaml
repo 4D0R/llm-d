@@ -20,3 +20,56 @@ patches:
           hostPath:
             path: /mnt/weka
             type: Directory
+  # Add hostNetwork for RDMA access without device plugin
+  - target:
+      kind: Deployment
+    patch: |-
+      - op: add
+        path: /spec/template/spec/hostNetwork
+        value: true
+
+  # Add privileged security context for unlimited memlock (RDMA memory pinning)
+  - target:
+      kind: Deployment
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/securityContext
+        value:
+          privileged: true
+          runAsUser: 0
+          capabilities:
+            add:
+              - IPC_LOCK
+              - SYS_RESOURCE
+
+  # Add RDMA device volumes
+  - target:
+      kind: Deployment
+    patch: |-
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value:
+          name: ib-rdma-cm
+          hostPath:
+            path: /dev/infiniband/rdma_cm
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value:
+          name: ib-uverbs
+          hostPath:
+            path: /dev/infiniband
+
+  # Add RDMA device mounts to vllm container
+  - target:
+      kind: Deployment
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value:
+          name: ib-rdma-cm
+          mountPath: /dev/infiniband/rdma_cm
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value:
+          name: ib-uverbs
+          mountPath: /dev/infiniband

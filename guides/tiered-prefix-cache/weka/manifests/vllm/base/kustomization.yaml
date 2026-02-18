@@ -118,12 +118,10 @@ patches:
             cpu: "8"
             memory: 64Gi
             nvidia.com/gpu: "1"
-            rdma/ib: 1
           requests:
             cpu: "8"
             memory: 64Gi
             nvidia.com/gpu: "1"
-            rdma/ib: 1
 
   # Add initContainers for WEKA GDS setup
   - target:
