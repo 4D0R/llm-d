@@ -235,10 +235,8 @@ patches:
       - op: add
         path: /spec/template/spec/volumes/-
         value:
-          name: host-node-cufile
-          hostPath:
-            path: ~/amg_stable/cufile.json
-            type: File
+          name: cufile-output
+          emptyDir: {}
 
   # Remove data volumeMount from base (not needed for WEKA)
   - target:
@@ -261,6 +259,7 @@ patches:
       - op: add
         path: /spec/template/spec/containers/0/volumeMounts/-
         value:
-          name: host-node-cufile
+          name: cufile-output
           mountPath: /etc/cufile.json
+          subPath: cufile.json
           readOnly: true
