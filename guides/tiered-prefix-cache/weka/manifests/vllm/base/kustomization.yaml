@@ -100,6 +100,11 @@ patches:
         value:
           name: NVIDIA_GDRCOPY
           value: "enabled"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: NVIDIA_GDS
+          value: "enabled"
 
   # Update resources for WEKA deployment
   - target:
