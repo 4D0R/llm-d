@@ -30,3 +30,14 @@ patches:
           - containerPort: 5600
             name: nixl
             protocol: TCP
+
+  # Add imagePullSecrets for private registry access
+  # TODO: This is temporary - will be removed when image becomes public
+  - target:
+      kind: Deployment
+      name: decode
+    patch: |-
+      - op: add
+        path: /spec/template/spec/imagePullSecrets
+        value:
+          - name: ghcr-secret
