@@ -6,6 +6,6 @@
     "infiniband-diags": "infiniband-diags"
   },
   "ubuntu_only": [
-    "libmlx5-1"
+    "ibverbs-providers"
   ]
 }
