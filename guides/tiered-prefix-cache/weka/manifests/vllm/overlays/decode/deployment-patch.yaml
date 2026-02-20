@@ -30,7 +30,7 @@ spec:
           allowPrivilegeEscalation: false
           runAsNonRoot: true
       - name: create-cufile
-        image: ghcr.io/llm-d/llm-d-cuda-dev-ubuntu:sha-cb9d356
+        image: ghcr.io/llm-d/llm-d-cuda-dev-ubuntu:sha-8c00fce
         imagePullPolicy: Always
         command:
         - /bin/bash

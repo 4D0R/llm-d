@@ -16,7 +16,7 @@ patches:
     patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/image
-        value: "ghcr.io/llm-d/llm-d:latest"
+        value: "ghcr.io/llm-d/llm-d-cuda-dev-ubuntu:sha-8c00fce"
 
   # Update command and args for WEKA deployment
   - target:
@@ -152,19 +152,16 @@ patches:
         path: /spec/template/spec/initContainers
         value:
           - name: enable-nvidia-gds
-            image: "ghcr.io/llm-d/llm-d:latest"
-            command:
-              - /usr/local/bin/enable-nvidia-gds.sh
+            image: "ghcr.io/llm-d/llm-d-cuda-dev-ubuntu:sha-8c00fce"
+            command: ["/bin/bash", "-c"]
+            args:
+              - |
+                lsmod | grep -q nvidia_fs || modprobe nvidia_fs || { echo "ERROR: Failed to load nvidia_fs" >&2; exit 1; }
+                lsmod | grep -q nvidia_peermem || modprobe nvidia_peermem || { echo "ERROR: Failed to load nvidia_peermem" >&2; exit 1; }
+                echo "GDS modules loaded successfully"
             securityContext:
               privileged: true
-          - name: create-cufile-on-node
-            image: quay.io/grpereir/amg-utils:latest
-            command:
-              - /usr/local/bin/entrypoint.sh
-            args:
-              - /bin/bash
-              - -lc
-              - "true"
+
 
   # Replace startup probe with GDS-specific probe
   - target:
@@ -257,6 +254,7 @@ patches:
         value:
           name: cufile-output
           emptyDir: {}
+
 
   # Remove data volumeMount from base (not needed for WEKA)
   - target:
