@@ -2,6 +2,10 @@
   "rhel_to_ubuntu": {
     "librdmacm": "librdmacm1t64",
     "libibverbs": "libibverbs1",
-    "libibumad": "libibumad3"
-  }
+    "libibumad": "libibumad3",
+    "infiniband-diags": "infiniband-diags"
+  },
+  "ubuntu_only": [
+    "libmlx5-1"
+  ]
 }
