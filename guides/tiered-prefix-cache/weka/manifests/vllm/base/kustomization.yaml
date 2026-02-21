@@ -125,6 +125,11 @@ patches:
         value:
           name: PROMETHEUS_MULTIPROC_DIR
           value: /tmp/lmcache_prometheus
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: PYTHONHASHSEED
+          value: "0"
 
   # Update resources for WEKA deployment
   - target:
