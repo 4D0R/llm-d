@@ -5,8 +5,7 @@ namespace: weka
 
 resources:
   - serviceAccount.yaml
-  - ../decode
-  - ../prefill
+  - ../aggregated
 
 patches:
   # Patch weka-storage volume to use hostPath for both decode and prefill
@@ -36,7 +35,6 @@ patches:
         path: /spec/template/spec/containers/0/securityContext
         value:
           privileged: true
-          runAsUser: 0
           capabilities:
             add:
               - IPC_LOCK
