@@ -5,7 +5,8 @@ namespace: weka
 
 resources:
   - serviceAccount.yaml
-  - ../aggregated
+  - ../decode
+  - ../prefill
 
 patches:
   # Patch weka-storage volume to use hostPath for both decode and prefill
